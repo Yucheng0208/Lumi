@@ -1,0 +1,7 @@
+{
+  // Cloudflare Workers 靜態網站：lumi.yucheng208.net
+  "name": "lumi",
+  "compatibility_date": "2026-10-01",
+  "assets": { "directory": "./public" },
+  "routes": [{ "pattern": "lumi.yucheng208.net", "custom_domain": true }]
+}

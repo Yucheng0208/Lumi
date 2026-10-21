@@ -677,8 +677,12 @@
     curveEd.set(p ? p.grade.curves[state.curveCh] : [[0, 0], [1, 1]], state.curveCh);
   }));
   $('curve-reset').addEventListener('click', () => {
-    const p = active(); if (!p) return;
-    p.grade.curves[state.curveCh] = [[0, 0], [1, 1]];
+    const p = active();
+    if (!p) { curveEd.set([[0, 0], [1, 1]], state.curveCh); return; }
+    const linear = (pts) => pts.length === 2 && pts[0][0] === 0 && pts[0][1] === 0 && pts[1][0] === 1 && pts[1][1] === 1;
+    // 這條已經是直線時改為重設全部曲線，避免按了看起來沒反應
+    const keys = linear(p.grade.curves[state.curveCh]) ? ['rgb', 'r', 'g', 'b'] : [state.curveCh];
+    for (const k of keys) p.grade.curves[k] = [[0, 0], [1, 1]];
     curveEd.set(p.grade.curves[state.curveCh], state.curveCh);
     gradeChanged(); updateHistogram(); commit();
   });

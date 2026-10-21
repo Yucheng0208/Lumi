@@ -286,7 +286,7 @@
         : lang === 'en' ? 'Lumi' : '光色 <span class="muted brand-latin">Lumi</span>';
     }
     document.querySelectorAll('.brand-text').forEach((el) => { el.textContent = lang === 'en' ? 'Lumi' : `${BRAND[lang]} · Lumi`; });
-    document.title = `${BRAND[lang]}${lang === 'en' ? '' : ' Lumi'} — ${t('app.tagline')}`;
+    document.title = lang === 'en' ? 'Lumi' : `${BRAND[lang]} Lumi`;
   }
 
   function setLang(code) {

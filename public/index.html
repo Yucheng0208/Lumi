@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>光色 Lumi — 相片與影片 LUT 濾鏡・調色工具</title>
+  <meta name="description" content="在瀏覽器裡為相片與影片套用相機風格、底片與電影感 LUT，並手動調整白平衡、曲線、HSL 與色彩分級。支援 JPG、HEIC、RAW、GIF、MP4、MOV 等格式，檔案不會上傳。">
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#1b1e23" media="(prefers-color-scheme: dark)">
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta property="og:title" content="光色 Lumi — LUT 濾鏡與調色工具">
+  <meta property="og:description" content="相機風格、底片、電影感濾鏡與完整手動調色，全部在你的瀏覽器中完成。">
+  <meta property="og:image" content="https://lumi.yucheng208.net/icons/icon-512.png">
+  <meta property="og:url" content="https://lumi.yucheng208.net/">
+  <link rel="stylesheet" href="assets/style.css?v=7">
+  <script>
+    // 主題：在畫面出現前套用，避免閃爍
+    (function () {
+      try { var t = localStorage.getItem('lumi.theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch (e) { /* 無痕模式 */ }
+    })();
+  </script>
+</head>
+<body>
+  <div id="splash" class="splash" aria-hidden="true">
+    <div class="splash-inner">
+      <div class="splash-mark"><img src="icons/icon-192.png" alt=""><span class="splash-glint"></span></div>
+      <p class="splash-name brand-short" translate="no">光色</p>
+      <p class="splash-sub" data-i18n="splash.sub">Lumi · LUT 調色</p>
+      <span class="splash-bar"><span></span></span>
+    </div>
+  </div>
+  <script>
+    (function () {
+      var splash = document.getElementById('splash'), start = Date.now(), done = false;
+      function hide() {
+        if (done) return; done = true;
+        setTimeout(function () { splash.classList.add('splash-out'); setTimeout(function () { splash.remove(); }, 600); }, Math.max(0, 1100 - (Date.now() - start)));
+      }
+      window.addEventListener('load', hide);
+      setTimeout(hide, 5000);
+    })();
+  </script>
+
+  <header class="topbar">
+    <div class="brand">
+      <img src="icons/icon-192.png" alt="" width="36" height="36">
+      <div>
+        <h1 id="brand-name" translate="no">光色 <span class="muted brand-latin">Lumi</span></h1>
+        <p class="tagline" data-i18n="app.tagline"></p>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <a class="kofi-btn kofi-top" href="https://ko-fi.com/G3K3292RM5" target="_blank" rel="noopener" data-i18n-aria="kofi" data-i18n-title="kofi">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M11.351 2.715c-2.7 0-4.986.025-6.83.26C2.078 3.285 0 5.154 0 8.61c0 3.506.182 6.13 1.585 8.493 1.584 2.701 4.233 4.182 7.662 4.182h.83c4.209 0 6.494-2.234 7.637-4a9.5 9.5 0 0 0 1.091-2.338C21.792 14.688 24 12.22 24 9.208v-.415c0-3.247-2.13-5.507-5.792-5.87-1.558-.156-2.65-.208-6.857-.208m0 1.947c4.208 0 5.09.052 6.571.182 2.624.311 4.13 1.584 4.13 4v.39c0 2.156-1.792 3.844-3.87 3.844h-.935l-.156.649c-.208 1.013-.597 1.818-1.039 2.546-.909 1.428-2.545 3.064-5.922 3.064h-.805c-2.571 0-4.831-.883-6.078-3.195-1.09-2-1.298-4.155-1.298-7.506 0-2.181.857-3.402 3.012-3.714 1.533-.233 3.559-.26 6.39-.26m6.547 2.287c-.416 0-.65.234-.65.546v2.935c0 .311.234.545.65.545 1.324 0 2.051-.754 2.051-2s-.727-2.026-2.052-2.026m-10.39.182c-1.818 0-3.013 1.48-3.013 3.142 0 1.533.858 2.857 1.949 3.897.727.701 1.87 1.429 2.649 1.896a1.47 1.47 0 0 0 1.507 0c.78-.467 1.922-1.195 2.623-1.896 1.117-1.039 1.974-2.364 1.974-3.897 0-1.662-1.247-3.142-3.039-3.142-1.065 0-1.792.545-2.338 1.298-.493-.753-1.246-1.298-2.312-1.298"/></svg>
+        <span data-i18n="kofi"></span>
+      </a>
+      <select id="ui-theme" class="mini-select" data-i18n-aria="ui.theme">
+        <option value="auto" data-i18n="ui.theme.auto"></option>
+        <option value="light" data-i18n="ui.theme.light"></option>
+        <option value="dark" data-i18n="ui.theme.dark"></option>
+      </select>
+      <select id="ui-lang" class="mini-select" data-i18n-aria="ui.language" translate="no"></select>
+      <label id="add-btn" class="btn btn-primary add-btn" for="file-input">
+        <svg class="mobile-only" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+        <span class="btn-label" data-i18n="btn.add"></span>
+      </label>
+      <button id="save-top" class="btn btn-primary save-top" type="button" disabled data-i18n="btn.saveShort"></button>
+      <input id="file-input" type="file" multiple hidden>
+      <input id="lut-input" type="file" accept=".cube,.3dl,.png,.CUBE" multiple hidden>
+    </div>
+  </header>
+
+  <main class="layout">
+    <!-- 檔案列表 -->
+    <aside class="panel list-panel">
+      <div class="panel-head">
+        <h2><span data-i18n="list.title"></span> <span id="count" class="muted">0</span></h2>
+        <button id="remove-all" class="btn btn-ghost btn-sm" type="button" data-i18n="list.removeAll"></button>
+      </div>
+      <form id="url-form" class="url-form">
+        <input id="url-input" type="url" inputmode="url" autocomplete="off" spellcheck="false" data-i18n-placeholder="url.placeholder" data-i18n-aria="url.placeholder">
+        <button class="btn btn-ghost btn-sm" type="submit" data-i18n="btn.urlAdd"></button>
+      </form>
+      <p class="hint url-hint" data-i18n="url.hint"></p>
+      <ul id="photo-list" class="photo-list"></ul>
+    </aside>
+
+    <!-- 預覽 -->
+    <section id="stage-panel" class="stage-panel">
+      <div id="stage-busy" class="stage-busy" role="status" aria-live="polite" hidden>
+        <span class="spinner" aria-hidden="true"></span><span id="stage-busy-text"></span>
+      </div>
+      <div id="dropzone" class="dropzone">
+        <div>
+          <button id="dz-add" class="dz-add" type="button" data-i18n-aria="btn.choose">
+            <svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+          </button>
+          <p class="dz-title" data-i18n="drop.title"></p>
+          <p class="muted dz-desc" data-i18n="drop.desc"></p>
+        </div>
+      </div>
+
+      <div id="stage" class="stage" hidden>
+        <div class="stage-toolbar">
+          <div class="left">
+            <div class="seg" id="view-seg">
+              <button class="seg-btn active" data-view="after" type="button" data-i18n="view.after"></button>
+              <button class="seg-btn" data-view="split" type="button" data-i18n="view.split"></button>
+              <button class="seg-btn" data-view="before" type="button" data-i18n="view.before"></button>
+            </div>
+          </div>
+          <span id="dims" class="muted dims"></span>
+        </div>
+        <div id="preview-wrap" class="canvas-wrap">
+          <canvas id="preview"></canvas>
+          <div id="split-line" class="split-line" hidden></div>
+          <span id="tag-before" class="split-tag" hidden data-i18n="view.before"></span>
+          <span id="tag-after" class="split-tag" hidden data-i18n="view.after"></span>
+        </div>
+        <div id="video-bar" class="video-bar" hidden>
+          <button id="play-toggle" class="btn btn-ghost btn-sm play-btn" type="button" data-i18n-aria="btn.play">❚❚</button>
+          <input id="scrub" type="range" min="0" max="1000" value="0" data-i18n-aria="view.scrub">
+          <span id="vtime" class="time">0:00</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 設定 -->
+    <aside id="settings-panel" class="panel settings-panel" data-tab="look">
+      <nav class="inspector-tabs desktop-only" role="tablist" data-i18n-aria="tab.label">
+        <button class="itab" role="tab" data-tab="look" type="button" data-i18n="tab.look"></button>
+        <button class="itab" role="tab" data-tab="adjust" type="button" data-i18n="tab.adjust"></button>
+        <button class="itab" role="tab" data-tab="curve" type="button" data-i18n="tab.curve"></button>
+        <button class="itab" role="tab" data-tab="color" type="button" data-i18n="tab.color"></button>
+        <button class="itab" role="tab" data-tab="fx" type="button" data-i18n="tab.fx"></button>
+        <button class="itab" role="tab" data-tab="export" type="button" data-i18n="tab.export"></button>
+      </nav>
+
+      <!-- 濾鏡 -->
+      <section class="group" data-tab="look">
+        <div class="subhead"><span data-i18n="look.input"></span></div>
+        <div class="field">
+          <select id="input-profile" data-i18n-aria="look.input"></select>
+          <p class="hint" data-i18n="look.input.hint"></p>
+        </div>
+
+        <div class="subhead"><span data-i18n="look.title"></span><button id="look-none" class="link-btn" type="button" data-i18n="look.remove"></button></div>
+        <div class="slider" data-key="lutAmount" data-label="s.lutAmount" data-min="0" data-max="100" data-def="100" data-unit="%"></div>
+        <div class="look-tools">
+          <input id="look-search" type="search" data-i18n-placeholder="look.search" data-i18n-aria="look.search">
+          <label class="btn btn-ghost btn-sm" for="lut-input" data-i18n="look.import" data-i18n-title="look.import.title"></label>
+        </div>
+        <div class="chips look-chips" id="look-chips"></div>
+        <div id="look-list"></div>
+        <p class="hint" data-i18n="look.disclaimer"></p>
+      </section>
+
+      <!-- 調整 -->
+      <section class="group" data-tab="adjust">
+        <canvas id="histo" class="histo" data-i18n-aria="adj.histogram"></canvas>
+        <div class="subhead"><span data-i18n="sec.wb"></span><button class="link-btn" data-reset="temp,tint" type="button" data-i18n="btn.reset"></button></div>
+        <div class="slider" data-key="temp" data-label="s.temp" data-grad="linear-gradient(90deg,#3b74e0,#c9c9c9,#f0a52e)"></div>
+        <div class="slider" data-key="tint" data-label="s.tint" data-grad="linear-gradient(90deg,#2f9e44,#c9c9c9,#d14fb6)"></div>
+        <div class="subhead"><span data-i18n="sec.light"></span><button class="link-btn" data-reset="exposure,contrast,highlights,shadows,whites,blacks" type="button" data-i18n="btn.reset"></button></div>
+        <div class="slider" data-key="exposure" data-label="s.exposure" data-min="-4" data-max="4" data-step="0.05" data-def="0" data-fixed="2" data-unit=" EV"></div>
+        <div class="slider" data-key="contrast" data-label="s.contrast"></div>
+        <div class="slider" data-key="highlights" data-label="s.highlights"></div>
+        <div class="slider" data-key="shadows" data-label="s.shadows"></div>
+        <div class="slider" data-key="whites" data-label="s.whites"></div>
+        <div class="slider" data-key="blacks" data-label="s.blacks"></div>
+        <div class="subhead"><span data-i18n="sec.presence"></span><button class="link-btn" data-reset="vibrance,saturation" type="button" data-i18n="btn.reset"></button></div>
+        <div class="slider" data-key="vibrance" data-label="s.vibrance" data-grad="linear-gradient(90deg,#9a9a9a,#c9a07a,#e86f3a)"></div>
+        <div class="slider" data-key="saturation" data-label="s.saturation" data-grad="linear-gradient(90deg,#9a9a9a,#e5484d,#3b74e0)"></div>
+        <p class="hint" data-i18n="adj.hint"></p>
+      </section>
+
+      <!-- 曲線 -->
+      <section class="group" data-tab="curve">
+        <div class="subhead"><span data-i18n="curve.title"></span><button id="curve-reset" class="link-btn" type="button" data-i18n="curve.reset"></button></div>
+        <div class="seg seg-full curve-seg" id="curve-seg">
+          <button class="seg-btn active" data-ch="rgb" type="button">RGB</button>
+          <button class="seg-btn" data-ch="r" type="button" data-i18n="curve.r"></button>
+          <button class="seg-btn" data-ch="g" type="button" data-i18n="curve.g"></button>
+          <button class="seg-btn" data-ch="b" type="button" data-i18n="curve.b"></button>
+        </div>
+        <div class="curve-box"><canvas id="curve"></canvas></div>
+        <p class="hint" data-i18n="curve.hint"></p>
+        <div class="subhead"><span data-i18n="curve.presets"></span></div>
+        <div class="chips" id="curve-presets" style="flex-wrap:wrap">
+          <button class="chip" data-preset="linear" type="button" data-i18n="preset.linear"></button>
+          <button class="chip" data-preset="soft" type="button" data-i18n="preset.soft"></button>
+          <button class="chip" data-preset="strong" type="button" data-i18n="preset.strong"></button>
+          <button class="chip" data-preset="matte" type="button" data-i18n="preset.matte"></button>
+          <button class="chip" data-preset="fade" type="button" data-i18n="preset.fade"></button>
+          <button class="chip" data-preset="invert" type="button" data-i18n="preset.invert"></button>
+        </div>
+      </section>
+
+      <!-- 色彩 -->
+      <section class="group" data-tab="color">
+        <div class="subhead"><span data-i18n="color.hsl"></span><button class="link-btn" data-reset="hsl" type="button" data-i18n="btn.resetAll"></button></div>
+        <div class="hsl-chips" id="hsl-chips"></div>
+        <div class="slider" data-hsl="0" data-label="s.hue" data-min="-30" data-max="30"></div>
+        <div class="slider" data-hsl="1" data-label="s.sat"></div>
+        <div class="slider" data-hsl="2" data-label="s.lum"></div>
+
+        <div class="subhead"><span data-i18n="color.grading"></span><button class="link-btn" data-reset="wheels" type="button" data-i18n="btn.reset"></button></div>
+        <div class="wheel-row">
+          <div class="wheel" data-wheel="sh"><canvas></canvas><span data-i18n="wheel.sh"></span></div>
+          <div class="wheel" data-wheel="mid"><canvas></canvas><span data-i18n="wheel.mid"></span></div>
+          <div class="wheel" data-wheel="hi"><canvas></canvas><span data-i18n="wheel.hi"></span></div>
+        </div>
+        <div class="slider" data-key="wheels.balance" data-label="s.balance"></div>
+        <p class="hint" data-i18n="color.hint"></p>
+      </section>
+
+      <!-- 效果 -->
+      <section class="group" data-tab="fx">
+        <div class="subhead"><span data-i18n="fx.vignette"></span><button class="link-btn" data-reset="vignette,vigMid,vigFeather" type="button" data-i18n="btn.reset"></button></div>
+        <div class="slider" data-key="vignette" data-label="s.amount"></div>
+        <div class="slider" data-key="vigMid" data-label="s.midpoint" data-min="0" data-max="100" data-def="50"></div>
+        <div class="slider" data-key="vigFeather" data-label="s.feather" data-min="0" data-max="100" data-def="50"></div>
+        <div class="subhead"><span data-i18n="fx.grain"></span><button class="link-btn" data-reset="grain,grainSize" type="button" data-i18n="btn.reset"></button></div>
+        <div class="slider" data-key="grain" data-label="s.amount" data-min="0" data-max="100" data-def="0"></div>
+        <div class="slider" data-key="grainSize" data-label="s.size" data-min="0" data-max="100" data-def="25"></div>
+        <div class="subhead"><span data-i18n="fx.detail"></span><button class="link-btn" data-reset="sharpen,fade" type="button" data-i18n="btn.reset"></button></div>
+        <div class="slider" data-key="sharpen" data-label="s.sharpen" data-min="0" data-max="100" data-def="0"></div>
+        <div class="slider" data-key="fade" data-label="s.fade" data-min="0" data-max="100" data-def="0"></div>
+      </section>
+
+      <!-- 輸出 -->
+      <section class="group" data-tab="export">
+        <div class="subhead"><span data-i18n="exp.scope"></span></div>
+        <div class="export-row">
+          <button id="copy-grade" class="btn btn-ghost btn-sm" type="button" data-i18n="exp.copy"></button>
+          <button id="paste-grade" class="btn btn-ghost btn-sm" type="button" disabled data-i18n="exp.paste"></button>
+          <button id="apply-all" class="btn btn-ghost btn-sm" type="button" data-i18n="exp.applyAll"></button>
+          <button id="reset-all" class="btn btn-ghost btn-sm" type="button" data-i18n="btn.resetAll"></button>
+        </div>
+
+        <div class="subhead"><span data-i18n="exp.photo"></span></div>
+        <div class="field">
+          <label data-i18n="exp.format"></label>
+          <div class="seg seg-full" id="photo-format">
+            <button class="seg-btn" data-v="jpeg" type="button">JPEG</button>
+            <button class="seg-btn" data-v="png" type="button">PNG</button>
+            <button class="seg-btn" data-v="webp" type="button">WebP</button>
+            <button class="seg-btn" data-v="avif" type="button">AVIF</button>
+          </div>
+        </div>
+        <div class="slider" data-out="quality" data-label="s.quality" data-min="50" data-max="100" data-def="92"></div>
+        <div class="field">
+          <label for="photo-size" data-i18n="exp.size"></label>
+          <select id="photo-size">
+            <option value="0" data-i18n="size.orig"></option>
+            <option value="6000" data-size="6000"></option>
+            <option value="4096" data-size="4096"></option>
+            <option value="3000" data-size="3000"></option>
+            <option value="2048" data-size="2048"></option>
+            <option value="1080" data-size="1080"></option>
+          </select>
+        </div>
+        <label class="check"><input id="keep-exif" type="checkbox" checked><span data-i18n="exp.keepExif"></span></label>
+
+        <div class="subhead"><span data-i18n="exp.video"></span></div>
+        <div class="field">
+          <label data-i18n="exp.format"></label>
+          <div class="seg seg-full" id="video-format">
+            <button class="seg-btn" data-v="mp4" type="button">MP4</button>
+            <button class="seg-btn" data-v="mov" type="button">MOV</button>
+            <button class="seg-btn" data-v="webm" type="button">WebM</button>
+            <button class="seg-btn" data-v="gif" type="button">GIF</button>
+          </div>
+        </div>
+        <div class="field">
+          <label for="video-width" data-i18n="exp.width"></label>
+          <select id="video-width">
+            <option value="0" data-i18n="size.orig"></option>
+            <option value="3840">3840 px (4K)</option>
+            <option value="1920">1920 px</option>
+            <option value="1280">1280 px</option>
+            <option value="720">720 px</option>
+            <option value="480">480 px</option>
+          </select>
+        </div>
+        <div class="slider gif-only" data-out="fps" data-label="s.fps" data-min="5" data-max="30" data-def="15" data-unit=" fps"></div>
+        <label class="check video-only"><input id="video-mute" type="checkbox"><span data-i18n="exp.mute"></span></label>
+        <p class="hint" data-i18n="exp.videoHint"></p>
+
+        <div class="subhead"><span data-i18n="slide.title"></span></div>
+        <p class="hint" style="margin:0 0 10px" data-i18n="slide.hint"></p>
+        <div class="field">
+          <label data-i18n="exp.format"></label>
+          <div class="seg seg-full" id="slide-format">
+            <button class="seg-btn" data-v="gif" type="button">GIF</button>
+            <button class="seg-btn" data-v="mp4" type="button">MP4</button>
+          </div>
+        </div>
+        <div class="slider" data-out="slideHold" data-label="slide.hold" data-min="0.2" data-max="5" data-step="0.1" data-def="1.5" data-fixed="1" data-unit=" s"></div>
+        <div class="field">
+          <label data-i18n="slide.motion"></label>
+          <div class="seg seg-full" id="slide-motion">
+            <button class="seg-btn" data-v="none" type="button" data-i18n="slide.none"></button>
+            <button class="seg-btn" data-v="fade" type="button" data-i18n="slide.fade"></button>
+            <button class="seg-btn" data-v="zoom" type="button" data-i18n="slide.zoom"></button>
+          </div>
+        </div>
+        <div class="slider slide-smooth" data-out="slideTrans" data-label="slide.trans" data-min="0.1" data-max="2" data-step="0.1" data-def="0.5" data-fixed="1" data-unit=" s"></div>
+        <div class="field">
+          <label data-i18n="slide.fit"></label>
+          <div class="seg seg-full" id="slide-fit">
+            <button class="seg-btn" data-v="cover" type="button" data-i18n="slide.cover"></button>
+            <button class="seg-btn" data-v="contain" type="button" data-i18n="slide.contain"></button>
+          </div>
+        </div>
+        <div class="field">
+          <label for="slide-size" data-i18n="slide.size"></label>
+          <select id="slide-size">
+            <option value="480">480 px</option>
+            <option value="720">720 px</option>
+            <option value="1080">1080 px</option>
+            <option value="1440">1440 px</option>
+          </select>
+        </div>
+        <button id="make-slides" class="btn btn-secondary" type="button" style="width:100%" disabled></button>
+
+        <div class="subhead"><span data-i18n="exp.lut"></span></div>
+        <div class="row">
+          <select id="cube-size" class="mini-select" data-i18n-aria="exp.lut">
+            <option value="33" data-i18n="cube.33"></option>
+            <option value="65" data-i18n="cube.65"></option>
+            <option value="17" data-i18n="cube.17"></option>
+          </select>
+          <button id="export-cube" class="btn btn-ghost btn-sm" type="button" data-i18n="exp.cube"></button>
+        </div>
+        <p class="hint" data-i18n="exp.cubeHint"></p>
+
+        <div class="mobile-only">
+          <div class="subhead"><span data-i18n="more.appearance"></span></div>
+          <div class="seg seg-full" id="ui-theme-m">
+            <button class="seg-btn" data-ui-theme="auto" type="button" data-i18n="ui.theme.auto"></button>
+            <button class="seg-btn" data-ui-theme="light" type="button" data-i18n="ui.theme.light"></button>
+            <button class="seg-btn" data-ui-theme="dark" type="button" data-i18n="ui.theme.dark"></button>
+          </div>
+          <div class="field mt-s">
+            <label for="ui-lang-m" data-i18n="ui.language"></label>
+            <select id="ui-lang-m" translate="no"></select>
+          </div>
+          <div class="about">
+            <img src="icons/icon-192.png" alt="" width="56" height="56">
+            <p class="about-name brand-text" translate="no">光色 · Lumi</p>
+            <p class="muted small">© <span class="copyright-year"></span> <a href="https://www.yucheng208.net" target="_blank" rel="noopener">Yu-Cheng Chang</a> <span data-i18n="about.rights"></span></p>
+            <a class="kofi-btn" href="https://ko-fi.com/G3K3292RM5" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M11.351 2.715c-2.7 0-4.986.025-6.83.26C2.078 3.285 0 5.154 0 8.61c0 3.506.182 6.13 1.585 8.493 1.584 2.701 4.233 4.182 7.662 4.182h.83c4.209 0 6.494-2.234 7.637-4a9.5 9.5 0 0 0 1.091-2.338C21.792 14.688 24 12.22 24 9.208v-.415c0-3.247-2.13-5.507-5.792-5.87-1.558-.156-2.65-.208-6.857-.208m0 1.947c4.208 0 5.09.052 6.571.182 2.624.311 4.13 1.584 4.13 4v.39c0 2.156-1.792 3.844-3.87 3.844h-.935l-.156.649c-.208 1.013-.597 1.818-1.039 2.546-.909 1.428-2.545 3.064-5.922 3.064h-.805c-2.571 0-4.831-.883-6.078-3.195-1.09-2-1.298-4.155-1.298-7.506 0-2.181.857-3.402 3.012-3.714 1.533-.233 3.559-.26 6.39-.26m6.547 2.287c-.416 0-.65.234-.65.546v2.935c0 .311.234.545.65.545 1.324 0 2.051-.754 2.051-2s-.727-2.026-2.052-2.026m-10.39.182c-1.818 0-3.013 1.48-3.013 3.142 0 1.533.858 2.857 1.949 3.897.727.701 1.87 1.429 2.649 1.896a1.47 1.47 0 0 0 1.507 0c.78-.467 1.922-1.195 2.623-1.896 1.117-1.039 1.974-2.364 1.974-3.897 0-1.662-1.247-3.142-3.039-3.142-1.065 0-1.792.545-2.338 1.298-.493-.753-1.246-1.298-2.312-1.298"/></svg>
+              <span data-i18n="kofi"></span>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <div class="export-dock">
+        <div class="export-row">
+          <button id="dl-one" class="btn btn-primary" type="button" disabled data-i18n="dock.one"></button>
+          <button id="share-one" class="btn btn-primary" type="button" disabled data-i18n="dock.share"></button>
+          <button id="dl-cube-dock" class="btn btn-secondary" type="button" disabled data-i18n="dock.cube"></button>
+          <button id="dl-all" class="btn btn-secondary" type="button" disabled data-i18n="dock.all"></button>
+        </div>
+        <progress id="progress" class="progress" max="1" value="0" hidden></progress>
+        <p id="status" class="status muted" role="status" aria-live="polite"></p>
+      </div>
+    </aside>
+  </main>
+
+  <!-- 手機版底部分頁列 -->
+  <nav id="tabbar" class="tabbar mobile-only" role="tablist" data-i18n-aria="tab.label">
+    <button class="tab" role="tab" data-tab="look" type="button">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="10" r="5.5"/><circle cx="15" cy="10" r="5.5"/><circle cx="12" cy="15" r="5.5"/></svg>
+      <span data-i18n="tab.look"></span>
+    </button>
+    <button class="tab" role="tab" data-tab="adjust" type="button">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>
+      <span data-i18n="tab.adjust"></span>
+    </button>
+    <button class="tab" role="tab" data-tab="curve" type="button">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="2.5"/><path d="M6 18c4 0 4-12 12-12"/></svg>
+      <span data-i18n="tab.curve"></span>
+    </button>
+    <button class="tab" role="tab" data-tab="color" type="button">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17M3.5 12h17"/></svg>
+      <span data-i18n="tab.color"></span>
+    </button>
+    <button class="tab" role="tab" data-tab="fx" type="button">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.2 5.8L20 11l-5.8 2.2L12 19l-2.2-5.8L4 11l5.8-2.2z"/></svg>
+      <span data-i18n="tab.fx"></span>
+    </button>
+    <button class="tab" role="tab" data-tab="export" type="button">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/></svg>
+      <span data-i18n="tab.export"></span>
+    </button>
+  </nav>
+
+  <footer class="site-footer">
+    <span translate="no">© <span class="copyright-year"></span> <a href="https://www.yucheng208.net" target="_blank" rel="noopener">Yu-Cheng Chang</a></span>
+    <span data-i18n="about.rights"></span>
+    <span class="footer-break" aria-hidden="true"></span>
+    <span data-i18n="footer.credit"></span>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js" defer></script>
+  <script src="assets/i18n.js?v=7"></script>
+  <script src="assets/color.js?v=7"></script>
+  <script src="assets/looks.js?v=7"></script>
+  <script src="assets/gl.js?v=7"></script>
+  <script src="assets/decode.js?v=7"></script>
+  <script src="assets/media.js?v=7"></script>
+  <script src="assets/widgets.js?v=7"></script>
+  <script src="assets/app.js?v=7"></script>
+</body>
+</html>

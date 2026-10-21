@@ -1,0 +1,9 @@
+{
+  "name": "lumi",
+  "private": true,
+  "description": "光色 Lumi — 相片與影片 LUT 濾鏡・調色工具",
+  "scripts": {
+    "dev": "python3 -m http.server 5180 --directory public",
+    "deploy": "npx wrangler deploy"
+  }
+}

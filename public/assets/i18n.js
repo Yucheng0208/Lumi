@@ -6,7 +6,7 @@
     'zh-Hant': {
       'app.tagline': '相片與影片 LUT 濾鏡・調色工具',
       'meta.description': '在瀏覽器裡為相片與影片套用相機風格、底片與電影感 LUT，並手動調整白平衡、曲線、HSL 與色彩分級。支援 JPG、HEIC、RAW、GIF、MP4、MOV 等格式，檔案不會上傳。',
-      'splash.sub': 'Lumi · LUT 調色',
+      'splash.sub': 'LUT 調色',
       'kofi': '請我喝咖啡',
       'ui.theme': '外觀', 'ui.theme.auto': '跟隨系統', 'ui.theme.light': '淺色', 'ui.theme.dark': '深色', 'ui.language': '語言',
       'btn.add': '＋ 加入相片／影片', 'btn.saveShort': '儲存', 'btn.choose': '選擇檔案', 'btn.urlAdd': '加入',
@@ -41,6 +41,7 @@
       'exp.scope': '套用範圍', 'exp.copy': '複製調整', 'exp.paste': '貼上調整', 'exp.applyAll': '套用到全部檔案',
       'exp.photo': '相片', 'exp.format': '格式', 's.quality': '品質', 'exp.size': '尺寸', 'size.orig': '原始尺寸', 'size.long': '長邊 {n} px',
       'exp.keepExif': '保留拍攝資訊（JPEG 原檔輸出成 JPEG 時）',
+      'exp.file': '檔名', 'exp.dateFormat': '日期格式', 'exp.dateHint': '用在「全部下載」的 ZIP 檔名。檔名不能含斜線，因此沒有 2026/10/24 這種格式。',
       'exp.video': '影片／GIF', 'exp.width': '寬度', 's.fps': 'GIF 影格率', 'exp.mute': '移除聲音',
       'exp.videoHint': '影片使用 ffmpeg.wasm 在瀏覽器中編碼，第一次需下載約 32MB，長影片會比較久。',
       'exp.lut': 'LUT 檔案', 'cube.33': '33³（通用）', 'cube.65': '65³（高精度）', 'cube.17': '17³（相機／螢幕）', 'exp.cube': '下載 .cube',
@@ -108,6 +109,7 @@
       'exp.scope': 'Apply to', 'exp.copy': 'Copy settings', 'exp.paste': 'Paste settings', 'exp.applyAll': 'Apply to all files',
       'exp.photo': 'Photos', 'exp.format': 'Format', 's.quality': 'Quality', 'exp.size': 'Size', 'size.orig': 'Original size', 'size.long': 'Long edge {n} px',
       'exp.keepExif': 'Keep camera info (JPEG to JPEG)',
+      'exp.file': 'File name', 'exp.dateFormat': 'Date format', 'exp.dateHint': 'Used in the ZIP file name for Download all. File names can’t contain slashes, so 2026/10/24 isn’t offered.',
       'exp.video': 'Video / GIF', 'exp.width': 'Width', 's.fps': 'GIF frame rate', 'exp.mute': 'Remove audio',
       'exp.videoHint': 'Videos are encoded in your browser with ffmpeg.wasm. The first export downloads about 32 MB; long videos take a while.',
       'exp.lut': 'LUT file', 'cube.33': '33³ (standard)', 'cube.65': '65³ (high precision)', 'cube.17': '17³ (cameras / monitors)', 'exp.cube': 'Download .cube',
@@ -157,7 +159,7 @@
     ja: {
       'app.tagline': '写真・動画の LUT フィルター＆カラー調整',
       'meta.description': 'ブラウザだけで写真や動画にカメラ風・フィルム風・シネマ風の LUT を適用し、ホワイトバランス、トーンカーブ、HSL、カラーグレーディングを細かく調整できます。JPG、HEIC、RAW、GIF、MP4、MOV などに対応。ファイルはアップロードされません。',
-      'splash.sub': 'Lumi · LUT カラー',
+      'splash.sub': 'LUT カラー',
       'kofi': 'コーヒーをおごる',
       'ui.theme': '外観', 'ui.theme.auto': 'システム', 'ui.theme.light': 'ライト', 'ui.theme.dark': 'ダーク', 'ui.language': '言語',
       'btn.add': '＋ 写真・動画を追加', 'btn.saveShort': '保存', 'btn.choose': 'ファイルを選択', 'btn.urlAdd': '追加',
@@ -192,6 +194,7 @@
       'exp.scope': '適用範囲', 'exp.copy': '設定をコピー', 'exp.paste': '設定を貼り付け', 'exp.applyAll': 'すべてのファイルに適用',
       'exp.photo': '写真', 'exp.format': '形式', 's.quality': '画質', 'exp.size': 'サイズ', 'size.orig': '元のサイズ', 'size.long': '長辺 {n} px',
       'exp.keepExif': '撮影情報を残す（JPEG から JPEG へ書き出す場合）',
+      'exp.file': 'ファイル名', 'exp.dateFormat': '日付の形式', 'exp.dateHint': '「すべてダウンロード」の ZIP ファイル名に使います。ファイル名にスラッシュは使えないため、2026/10/24 形式はありません。',
       'exp.video': '動画・GIF', 'exp.width': '幅', 's.fps': 'GIF フレームレート', 'exp.mute': '音声を削除',
       'exp.videoHint': '動画はブラウザ内の ffmpeg.wasm でエンコードします。初回は約 32MB をダウンロードし、長い動画は時間がかかります。',
       'exp.lut': 'LUT ファイル', 'cube.33': '33³（標準）', 'cube.65': '65³（高精度）', 'cube.17': '17³（カメラ・モニター）', 'exp.cube': '.cube をダウンロード',
@@ -268,7 +271,7 @@
     return s;
   }
 
-  // 品牌名稱：中文「光色」、英文「Lumi」、日文「光色（こうしょく）」
+  // 品牌名稱（同光痕）：中文只用「光色」、英文只用「Lumi」、日文用「光色」加注音こうしょく
   const BRAND = { 'zh-Hant': '光色', en: 'Lumi', ja: '光色' };
 
   function apply(root) {
@@ -282,11 +285,12 @@
     if (meta) meta.content = t('meta.description');
     const h1 = document.getElementById('brand-name');
     if (h1) {
-      h1.innerHTML = lang === 'ja' ? '<ruby>光色<rt>こうしょく</rt></ruby>'
-        : lang === 'en' ? 'Lumi' : '光色 <span class="muted brand-latin">Lumi</span>';
+      h1.innerHTML = lang === 'en' ? '<span class="brand-en">Lumi</span>'
+        : lang === 'ja' ? '<span class="brand-zh"><ruby>光色<rt>こうしょく</rt></ruby></span>'
+        : '<span class="brand-zh">光色</span>';
     }
-    document.querySelectorAll('.brand-text').forEach((el) => { el.textContent = lang === 'en' ? 'Lumi' : `${BRAND[lang]} · Lumi`; });
-    document.title = lang === 'en' ? 'Lumi' : `${BRAND[lang]} Lumi`;
+    document.querySelectorAll('.brand-text, .brand-short').forEach((el) => { el.textContent = BRAND[lang]; });
+    document.title = BRAND[lang];
   }
 
   function setLang(code) {

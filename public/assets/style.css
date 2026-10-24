@@ -82,7 +82,8 @@ h2 { font-size: 13px; margin: 0 0 10px; font-weight: 650; }
 .kofi-btn:hover { background: var(--active); border-color: #e9a23b; transform: translateY(-1px); }
 .kofi-top { padding: 6px 12px; font-size: 12px; margin-right: 4px; }
 @media (max-width: 1100px) { .kofi-top span { display: none; } .kofi-top { padding: 6px 9px; } }
-@media (max-width: 720px) { .kofi-top { display: none; } }
+@media (max-width: 720px) { .kofi-top { padding: 0; width: 40px; height: 40px; margin-right: 0; justify-content: center; border-radius: 50%; } } /* 手機只留圓形圖示，和「＋」一樣大 */
+.site-footer .kofi-foot { margin-top: 6px; padding: 5px 14px; font-size: 12px; color: var(--text); text-decoration: none; }
 .about .kofi-btn { margin-top: 14px; padding: 10px 20px; font-size: 14px; }
 
 /* splash */

@@ -565,17 +565,46 @@
     drawLookThumbs(cards);
   }
 
-  /** 範例影像：沒有相片時給濾鏡縮圖用（天空、膚色、綠地漸層） */
+  /** 範例影像：沒有相片時給濾鏡縮圖用。黃昏湖景：天空、夕陽、山、水面、草地、紅帆、黃花，涵蓋常見色調 */
   const sampleThumb = (() => {
+    const S = 288, k = S / 72;  // 先畫 4 倍再縮小，邊緣比較平滑
+    const big = document.createElement('canvas'); big.width = big.height = S;
+    const x = big.getContext('2d');
+    x.scale(k, k);
+    const lin = (y0, y1, stops) => { const g = x.createLinearGradient(0, y0, 0, y1); stops.forEach(([o, c]) => g.addColorStop(o, c)); return g; };
+    const blob = (pts, fill) => { x.fillStyle = fill; x.beginPath(); x.moveTo(pts[0], pts[1]); for (let i = 2; i < pts.length; i += 2) x.lineTo(pts[i], pts[i + 1]); x.closePath(); x.fill(); };
+
+    // 天空：深藍 → 淡紫 → 蜜桃色地平線
+    x.fillStyle = lin(0, 42, [[0, '#2f5fa8'], [0.45, '#8a8fd0'], [0.8, '#f3b38a'], [1, '#ffd9a0']]);
+    x.fillRect(0, 0, 72, 42);
+    // 夕陽與光暈
+    let g = x.createRadialGradient(50, 26, 0, 50, 26, 28);
+    g.addColorStop(0, 'rgba(255,240,200,.95)'); g.addColorStop(0.25, 'rgba(255,200,120,.55)'); g.addColorStop(1, 'rgba(255,170,110,0)');
+    x.fillStyle = g; x.fillRect(0, 0, 72, 42);
+    x.fillStyle = '#fff4d6'; x.beginPath(); x.arc(50, 26, 5, 0, 7); x.fill();
+    // 遠山（帶霧的藍紫）與近山
+    blob([0, 42, 0, 30, 10, 24, 20, 29, 30, 21, 42, 30, 52, 26, 62, 31, 72, 27, 72, 42], '#7c76b4');
+    blob([0, 42, 0, 34, 12, 31, 24, 36, 34, 32, 46, 37, 58, 33, 72, 36, 72, 42], '#4f5a8f');
+    // 湖面：倒映天空，中間一道夕陽光
+    x.fillStyle = lin(42, 58, [[0, '#f0b48e'], [0.35, '#9a8fc4'], [1, '#3d5a96']]);
+    x.fillRect(0, 42, 72, 16);
+    for (let i = 0; i < 6; i++) { x.fillStyle = `rgba(255,236,190,${0.75 - i * 0.11})`; x.fillRect(50 - 5 + i * 0.6, 43 + i * 2.4, 10 - i * 1.2, 0.9); }
+    // 紅色帆船
+    blob([20, 50, 31, 50, 29, 52.5, 22, 52.5], '#3a2b2b');
+    blob([25, 49.5, 25, 40, 31, 49.5], '#e2483d');
+    blob([24.5, 49.5, 24.5, 42.5, 20.5, 49.5], '#f6efe4');
+    // 前景草地
+    blob([0, 72, 0, 57, 14, 55, 30, 57.5, 44, 56, 58, 57, 72, 55.5, 72, 72], lin(55, 72, [[0, '#7fae4e'], [1, '#2f5a2a']]));
+    // 黃花與粉花
+    [[6, 62], [11, 66], [16, 61], [9, 69], [60, 63], [65, 67], [56, 68], [68, 62]].forEach(([fx, fy], i) => {
+      x.fillStyle = i % 3 === 2 ? '#f48fb1' : '#ffd23f'; x.beginPath(); x.arc(fx, fy, 1.4, 0, 7); x.fill();
+    });
+
     const c = document.createElement('canvas'); c.width = c.height = 72;
-    const x = c.getContext('2d');
-    let g = x.createLinearGradient(0, 0, 0, 40); g.addColorStop(0, '#5a8fd6'); g.addColorStop(1, '#f2d3a0');
-    x.fillStyle = g; x.fillRect(0, 0, 72, 40);
-    g = x.createLinearGradient(0, 40, 0, 72); g.addColorStop(0, '#6f9a45'); g.addColorStop(1, '#2d4a24');
-    x.fillStyle = g; x.fillRect(0, 40, 72, 32);
-    x.fillStyle = '#e0a98a'; x.beginPath(); x.arc(46, 38, 12, 0, 7); x.fill();
-    x.fillStyle = '#b5413a'; x.fillRect(10, 46, 16, 18);
-    return x.getImageData(0, 0, 72, 72);
+    const cx = c.getContext('2d');
+    cx.imageSmoothingQuality = 'high';
+    cx.drawImage(big, 0, 0, 72, 72);
+    return cx.getImageData(0, 0, 72, 72);
   })();
 
   function drawLookThumbs(cards) {

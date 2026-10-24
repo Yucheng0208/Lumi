@@ -15,7 +15,7 @@
     theme: 'auto', tab: 'look', photoFormat: 'jpeg', quality: 92, photoSize: 0, keepExif: true,
     videoFormat: 'mp4', videoWidth: 0, fps: 15, mute: false, cubeSize: 33, lookFilter: 'all',
     slideFormat: 'gif', slideHold: 1.5, slideMotion: 'fade', slideTrans: 0.5, slideFit: 'cover', slideSize: 720,
-    dateFormat: 'dash',  // dash：2026-10-24；dot：2026.10.24；short：10月24日（同光痕，檔名不能用斜線）
+    dateFormat: 'dash',  // slash：2026/10/24；dash：2026-10-24；dot：2026.10.24；short：10月24日（同光痕）
   }, (() => { try { return JSON.parse(localStorage.getItem(SETTINGS_KEY)) || {}; } catch (e) { return {}; } })());
   const saveSettings = () => { try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch (e) { /* 無痕模式 */ } };
 
@@ -808,14 +808,21 @@
   const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   function fmtDate(d = new Date(), format = settings.dateFormat) {
     const y = d.getFullYear(), mo = d.getMonth() + 1, day = d.getDate();
+    if (format === 'slash') return `${y}/${pad2(mo)}/${pad2(day)}`;
     if (format === 'dot') return `${y}.${pad2(mo)}.${pad2(day)}`;
     if (format === 'short') return I18n.lang === 'en' ? `${MONTHS[mo - 1]} ${day}` : `${mo}月${day}日`; // 中文、日文相同
     return `${y}-${pad2(mo)}-${pad2(day)}`;
   }
   const dateLabels = () => $$('#date-format .seg-btn').forEach((b) => { b.textContent = fmtDate(new Date(), b.dataset.v); });
-  if (!['dash', 'dot', 'short'].includes(settings.dateFormat)) settings.dateFormat = 'dash';
+  if (!['slash', 'dash', 'dot', 'short'].includes(settings.dateFormat)) settings.dateFormat = 'dash';
   segBind('date-format', 'dateFormat');
   dateLabels();
+  // 範例日期跟著今天走：過午夜、切回分頁時重新整理
+  (function tickMidnight() {
+    const now = new Date(), next = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+    setTimeout(() => { dateLabels(); tickMidnight(); }, next - now + 1000);
+  })();
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) dateLabels(); });
 
   const baseName = (n) => n.replace(/\.[^.]+$/, '');
   const outName = (p, ext) => `${baseName(p.name)}_lumi.${ext}`;
@@ -930,7 +937,7 @@
     }
     setStatus(t('st.zipping'));
     const out = await zip.generateAsync({ type: 'blob', compression: 'STORE' });
-    download(out, `lumi_${fmtDate()}.zip`);
+    download(out, `lumi_${fmtDate().replace(/\//g, '／')}.zip`); // 檔名不能有斜線，改用全形
     setStatus(t('st.zipDone', { n: state.photos.length }));
   }));
 

@@ -249,6 +249,7 @@ h2 { font-size: 13px; margin: 0 0 10px; font-weight: 650; }
 .seg-btn.active { background: var(--primary); color: var(--primary-text); box-shadow: 0 2px 8px rgba(98, 72, 232, .25); }
 .seg-full { display: flex; }
 .seg-full .seg-btn { flex: 1; font-variant-numeric: tabular-nums; }
+#date-format { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; } /* 四種日期放兩排 */
 .color-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .swatch {
   width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--border); cursor: pointer; flex: none;
